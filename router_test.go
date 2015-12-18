@@ -83,6 +83,23 @@ func TestRouter(t *testing.T) {
 			})
 		})
 
+		Convey("When I go to url with no lang, but an Accept-Language header", func() {
+			client := &http.Client{}
+			url := fmt.Sprintf("%s/%s", server.URL, "other")
+			req, err := http.NewRequest("GET", url, nil)
+			So(err, ShouldBeNil)
+
+			req.Header.Add("Accept-Language", "es-ES;q=0.8, es;q=0.7")
+			_, err = client.Do(req)
+			So(err, ShouldBeNil)
+
+			Convey("The language provided in the header should be used", func() {
+				So(handler.Tag, ShouldResemble, language.Spanish)
+				So(handler.Request.URL.Path, ShouldEqual, "/other")
+			})
+
+		})
+
 		Convey("When I finish any request", func() {
 			url := fmt.Sprintf("%s/%s", server.URL, "other")
 			_, err := http.Get(url)

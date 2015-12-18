@@ -86,16 +86,26 @@ func (router *Router) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	tag, match, valid, exact := router.match(segments[1])
 
 	if !match {
-		//TODO: Look at what the browser accepts
+		tags, _, _ := language.ParseAcceptLanguage(r.Header.Get("Accept-Language"))
 		tag = router.DefaultLanguage
+
+		for _, t := range tags {
+			a, b, _, c := router.match(t.String())
+			if b {
+				tag, match, exact = a, b, c
+				break
+			}
+		}
 	}
 
 	if !valid {
-		segments = append([]string{"", tag.String()}, segments[1:]...)
+		str := router.tagString(tag)
+		segments = append([]string{"", str}, segments[1:]...)
 	}
 
 	if !exact {
-		segments[1] = tag.String()
+		str := router.tagString(tag)
+		segments[1] = str
 	}
 
 	if !match || !valid || !exact {
