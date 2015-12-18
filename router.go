@@ -35,9 +35,9 @@ type Router struct {
 	Handler            http.Handler
 }
 
-func (router *Router) match(locale string) (matched language.Tag, match bool, valid bool, exact bool) {
-	tag, err := language.Parse(locale)
-	if err != nil || locale == "" {
+func (router *Router) match(lang string) (matched language.Tag, match bool, valid bool, exact bool) {
+	tag, err := language.Parse(lang)
+	if err != nil || lang == "" {
 		return language.Und, false, false, false
 	}
 

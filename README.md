@@ -6,12 +6,21 @@ This package is a translation package for golang. It provides basic translation 
 storage := i18n.NewInMemoryStorage() // this is non persistent storage, for testing only
 t := i18n.New(storage)
 
-value := t.GetWithLocaleString("en-GB", "SomeKey")
+value := t.GetWithLangString("en-GB", "SomeKey")
 if value != nil {
     // Translation exists
 }else{
     // Translation does not exist
 }
+
+// OR
+
+valueString := t.T("en-GB", "SomeKey")
+
+// OR
+
+valueString := t.T(language.BritishEnglish, "SomeKey")
+
 ```
 
 It allows background synchronization with the storage for updating translations.
@@ -50,7 +59,7 @@ func main() {
     translations := i18n.New(storage)
 
     translations.Add(&i18n.Translation{
-        Locale: language.English
+        Lang: language.English
         Key: "SomeKey",
         Value: "SomeValue"
     })

@@ -39,45 +39,45 @@ func TestRouter(t *testing.T) {
 
 		server := httptest.NewServer(r)
 
-		Convey("When I go to url with valid locale", func() {
+		Convey("When I go to url with valid lang", func() {
 			url := fmt.Sprintf("%s/%s/%s", server.URL, language.Spanish.String(), "other")
 			_, err := http.Get(url)
 			So(err, ShouldBeNil)
 
-			Convey("Then the correct locale and path should be forwarded to the handler", func() {
+			Convey("Then the correct lang and path should be forwarded to the handler", func() {
 				So(handler.Tag, ShouldResemble, language.Spanish)
 				So(handler.Request.URL.Path, ShouldEqual, "/other")
 			})
 		})
 
-		Convey("When I go to url with valid child locale", func() {
+		Convey("When I go to url with valid child lang", func() {
 			url := fmt.Sprintf("%s/%s/%s", server.URL, language.AmericanEnglish.String(), "other")
 			_, err := http.Get(url)
 			So(err, ShouldBeNil)
 
-			Convey("Then the parent locale and correct path should be forwarded to the handler", func() {
+			Convey("Then the parent lang and correct path should be forwarded to the handler", func() {
 				So(handler.Tag, ShouldResemble, language.English)
 				So(handler.Request.URL.Path, ShouldEqual, "/other")
 			})
 		})
 
-		Convey("When I go to url with invalid locale", func() {
+		Convey("When I go to url with invalid lang", func() {
 			url := fmt.Sprintf("%s/%s/%s", server.URL, language.French.String(), "other")
 			_, err := http.Get(url)
 			So(err, ShouldBeNil)
 
-			Convey("Then the default locale and correct path should be forwarded to the handler", func() {
+			Convey("Then the default lang and correct path should be forwarded to the handler", func() {
 				So(handler.Tag, ShouldResemble, r.DefaultLanguage)
 				So(handler.Request.URL.Path, ShouldEqual, "/other")
 			})
 		})
 
-		Convey("When I go to url with no locale", func() {
+		Convey("When I go to url with no lang", func() {
 			url := fmt.Sprintf("%s/%s", server.URL, "other")
 			_, err := http.Get(url)
 			So(err, ShouldBeNil)
 
-			Convey("Then the default locale and correct path should be forwarded to the handler", func() {
+			Convey("Then the default lang and correct path should be forwarded to the handler", func() {
 				So(handler.Tag, ShouldResemble, r.DefaultLanguage)
 				So(handler.Request.URL.Path, ShouldEqual, "/other")
 			})

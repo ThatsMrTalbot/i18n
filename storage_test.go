@@ -16,7 +16,7 @@ func TestInMemoryStorage(t *testing.T) {
 		Convey("When an item is added to the memory store", func() {
 
 			expected := &Translation{
-				Locale: language.English,
+				Lang: language.English,
 				Key:    "SomeKey",
 				Value:  "SomeValue",
 			}
@@ -35,13 +35,13 @@ func TestInMemoryStorage(t *testing.T) {
 		Convey("When an item is added twice to the memory store", func() {
 
 			expected := &Translation{
-				Locale: language.English,
+				Lang: language.English,
 				Key:    "SomeKey",
 				Value:  "SomeValue",
 			}
 
 			replacement := &Translation{
-				Locale: language.English,
+				Lang: language.English,
 				Key:    "SomeKey",
 				Value:  "SomeOtherValue",
 			}
@@ -69,7 +69,7 @@ func TestInMemoryStorage(t *testing.T) {
 	Convey("Given a populated cache", t, func() {
 		storage := NewInMemoryStorage()
 		err := storage.Store(&Translation{
-			Locale: language.English,
+			Lang: language.English,
 			Key:    "SomeKey",
 			Value:  "SomeValue",
 		})
@@ -77,7 +77,7 @@ func TestInMemoryStorage(t *testing.T) {
 
 		Convey("When an item is deleted from the cache", func() {
 			storage.Delete(&Translation{
-				Locale: language.English,
+				Lang: language.English,
 				Key:    "SomeKey",
 				Value:  "SomeValue",
 			})

@@ -9,9 +9,9 @@ import (
 
 // Translation object
 type Translation struct {
-	Locale language.Tag
-	Key    string
-	Value  string
+	Lang  language.Tag
+	Key   string
+	Value string
 }
 
 // I18n defines basic translation get/set methods
@@ -84,15 +84,15 @@ func (i18n *I18n) SetRefreshInterval(d time.Duration) {
 	}(refresh, i18n.quit)
 }
 
-// T is a helper method to get translation by locale string or language tag
-func (i18n *I18n) T(locale interface{}, key string) string {
+// T is a helper method to get translation by lang string or language tag
+func (i18n *I18n) T(lang interface{}, key string) string {
 	var translation *Translation
 
-	switch locale.(type) {
+	switch lang.(type) {
 	case string:
-		translation, _ = i18n.GetWithLocaleString(locale.(string), key)
+		translation, _ = i18n.GetWithLangString(lang.(string), key)
 	case language.Tag:
-		translation = i18n.Get(locale.(language.Tag), key)
+		translation = i18n.Get(lang.(language.Tag), key)
 	}
 
 	if translation != nil {
@@ -111,9 +111,9 @@ func (i18n *I18n) Close() error {
 	return nil
 }
 
-// GetWithLocaleString parses the locale string before lookip up the translation
-func (i18n *I18n) GetWithLocaleString(locale string, key string) (*Translation, error) {
-	tag, err := language.Parse(locale)
+// GetWithLangString parses the lang string before lookip up the translation
+func (i18n *I18n) GetWithLangString(lang string, key string) (*Translation, error) {
+	tag, err := language.Parse(lang)
 
 	if err != nil {
 		return nil, err
@@ -123,19 +123,19 @@ func (i18n *I18n) GetWithLocaleString(locale string, key string) (*Translation, 
 }
 
 // Get translation
-func (i18n *I18n) Get(locale language.Tag, key string) *Translation {
+func (i18n *I18n) Get(lang language.Tag, key string) *Translation {
 	i18n.lock.RLock()
 	defer i18n.lock.RUnlock()
 
 	for {
-		if t := i18n.translations.Get(locale, key); t != nil {
+		if t := i18n.translations.Get(lang, key); t != nil {
 			return t
 		}
 
-		if locale.IsRoot() {
+		if lang.IsRoot() {
 			break
 		}
-		locale = locale.Parent()
+		lang = lang.Parent()
 	}
 
 	return nil

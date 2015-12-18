@@ -18,7 +18,7 @@ func TestI18n(t *testing.T) {
 
 		Convey("When a translation is added", func() {
 			expected := &Translation{
-				Locale: language.English,
+				Lang: language.English,
 				Key:    "SomeKey",
 				Value:  "SomeValue",
 			}
@@ -33,7 +33,7 @@ func TestI18n(t *testing.T) {
 			})
 
 			Convey("Then the translation should be accessable with locle string", func() {
-				result, err := i18n.GetWithLocaleString("en", "SomeKey")
+				result, err := i18n.GetWithLangString("en", "SomeKey")
 				So(err, ShouldBeNil)
 				So(result, ShouldNotBeNil)
 				So(result, ShouldResemble, expected)
@@ -64,7 +64,7 @@ func TestI18n(t *testing.T) {
 		Convey("When a translation is added to the storage", func() {
 
 			expected := &Translation{
-				Locale: language.English,
+				Lang: language.English,
 				Key:    "SomeKey",
 				Value:  "SomeValue",
 			}
@@ -111,7 +111,7 @@ func TestI18n(t *testing.T) {
 		i18n := New(storage)
 
 		expected := &Translation{
-			Locale: language.English,
+			Lang: language.English,
 			Key:    "SomeKey",
 			Value:  "SomeValue",
 		}

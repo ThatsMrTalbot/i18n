@@ -31,9 +31,9 @@ func (storage *inMemoryStorage) Store(translation *Translation) error {
 	defer storage.lock.Unlock()
 
 	for _, t := range storage.translations {
-		sameLocale := t.Locale.String() == translation.Locale.String()
+		sameLang := t.Lang.String() == translation.Lang.String()
 		sameKey := t.Key == translation.Key
-		if sameLocale && sameKey {
+		if sameLang && sameKey {
 			t.Value = translation.Value
 			return nil
 		}
@@ -49,9 +49,9 @@ func (storage *inMemoryStorage) Delete(translation *Translation) error {
 	defer storage.lock.Unlock()
 
 	for i, t := range storage.translations {
-		sameLocale := t.Locale.String() == translation.Locale.String()
+		sameLang := t.Lang.String() == translation.Lang.String()
 		sameKey := t.Key == translation.Key
-		if sameLocale && sameKey {
+		if sameLang && sameKey {
 			storage.translations, storage.translations[len(storage.translations)-1] = append(storage.translations[:i], storage.translations[i+1:]...), nil
 			return nil
 		}

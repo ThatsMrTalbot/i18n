@@ -15,7 +15,7 @@ func TestCache(t *testing.T) {
 		cache := new(Cache)
 		Convey("When an item is added to the cache", func() {
 			expected := &Translation{
-				Locale: language.English,
+				Lang: language.English,
 				Key:    "SomeKey",
 				Value:  "SomeValue",
 			}
@@ -32,14 +32,14 @@ func TestCache(t *testing.T) {
 	Convey("Given a populated cache", t, func() {
 		cache := new(Cache)
 		cache.Add(&Translation{
-			Locale: language.English,
+			Lang: language.English,
 			Key:    "SomeKey",
 			Value:  "SomeValue",
 		})
 
 		Convey("When an item is deleted from the cache", func() {
 			cache.Delete(&Translation{
-				Locale: language.English,
+				Lang: language.English,
 				Key:    "SomeKey",
 				Value:  "SomeValue",
 			})

@@ -29,7 +29,7 @@ func (cache *Cache) Add(translation *Translation) {
 		cache.cache = make(map[string]map[string]*Translation)
 	}
 
-	l := translation.Locale.String()
+	l := translation.Lang.String()
 
 	if _, ok := cache.cache[l]; !ok {
 		cache.cache[l] = make(map[string]*Translation)
@@ -39,7 +39,7 @@ func (cache *Cache) Add(translation *Translation) {
 }
 
 // Get translation from cache
-func (cache *Cache) Get(locale language.Tag, key string) *Translation {
+func (cache *Cache) Get(lang language.Tag, key string) *Translation {
 	cache.lock.RLock()
 	defer cache.lock.RUnlock()
 
@@ -47,7 +47,7 @@ func (cache *Cache) Get(locale language.Tag, key string) *Translation {
 		return nil
 	}
 
-	l := locale.String()
+	l := lang.String()
 
 	if _, ok := cache.cache[l]; !ok {
 		return nil
@@ -69,7 +69,7 @@ func (cache *Cache) Delete(translation *Translation) {
 		return
 	}
 
-	l := translation.Locale.String()
+	l := translation.Lang.String()
 
 	if _, ok := cache.cache[l]; !ok {
 		return
