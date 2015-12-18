@@ -1,5 +1,7 @@
 # i18n
 
+[![GoDoc](https://godoc.org/github.com/ThatsMrTalbot/i18n?status.svg)](https://godoc.org/github.com/ThatsMrTalbot/i18n) [![Build Status](https://travis-ci.org/ThatsMrTalbot/i18n.svg)](https://travis-ci.org/ThatsMrTalbot/i18n)
+
 This package is a translation package for golang. It provides basic translation management and http routing.
 
 ```go
