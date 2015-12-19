@@ -75,14 +75,14 @@ func TestInMemoryStorage(t *testing.T) {
 		})
 		So(err, ShouldBeNil)
 
-		Convey("When an item is deleted from the cache", func() {
+		Convey("When an item is deleted from the storage", func() {
 			storage.Delete(&Translation{
 				Lang:  language.English,
 				Key:   "SomeKey",
 				Value: "SomeValue",
 			})
 
-			Convey("The item should not exists in the cache", func() {
+			Convey("The item should not exists in the storage", func() {
 				results, err := storage.GetAll()
 				So(err, ShouldBeNil)
 				So(results, ShouldHaveLength, 0)
