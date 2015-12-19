@@ -1,4 +1,7 @@
 language: go
 
+services:
+    - redis-server
+
 go:
     - tip
