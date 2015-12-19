@@ -16,9 +16,9 @@ func TestInMemoryStorage(t *testing.T) {
 		Convey("When an item is added to the memory store", func() {
 
 			expected := &Translation{
-				Lang: language.English,
-				Key:    "SomeKey",
-				Value:  "SomeValue",
+				Lang:  language.English,
+				Key:   "SomeKey",
+				Value: "SomeValue",
 			}
 
 			err := storage.Store(expected)
@@ -35,15 +35,15 @@ func TestInMemoryStorage(t *testing.T) {
 		Convey("When an item is added twice to the memory store", func() {
 
 			expected := &Translation{
-				Lang: language.English,
-				Key:    "SomeKey",
-				Value:  "SomeValue",
+				Lang:  language.English,
+				Key:   "SomeKey",
+				Value: "SomeValue",
 			}
 
 			replacement := &Translation{
-				Lang: language.English,
-				Key:    "SomeKey",
-				Value:  "SomeOtherValue",
+				Lang:  language.English,
+				Key:   "SomeKey",
+				Value: "SomeOtherValue",
 			}
 
 			err := storage.Store(expected)
@@ -66,20 +66,20 @@ func TestInMemoryStorage(t *testing.T) {
 		})
 	})
 
-	Convey("Given a populated cache", t, func() {
+	Convey("Given a populated storage", t, func() {
 		storage := NewInMemoryStorage()
 		err := storage.Store(&Translation{
-			Lang: language.English,
-			Key:    "SomeKey",
-			Value:  "SomeValue",
+			Lang:  language.English,
+			Key:   "SomeKey",
+			Value: "SomeValue",
 		})
 		So(err, ShouldBeNil)
 
 		Convey("When an item is deleted from the cache", func() {
 			storage.Delete(&Translation{
-				Lang: language.English,
-				Key:    "SomeKey",
-				Value:  "SomeValue",
+				Lang:  language.English,
+				Key:   "SomeKey",
+				Value: "SomeValue",
 			})
 
 			Convey("The item should not exists in the cache", func() {

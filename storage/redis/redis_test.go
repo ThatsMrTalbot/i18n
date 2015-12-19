@@ -69,7 +69,7 @@ func TestRedisStorage(t *testing.T) {
 		})
 	})
 
-	Convey("Given a populated cache", t, func() {
+	Convey("Given a populated storage", t, func() {
 		storage, err := Connect("127.0.0.1:6379", "", 0)
 		So(err, ShouldBeNil)
 
