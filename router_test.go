@@ -26,16 +26,11 @@ func TestRouter(t *testing.T) {
 
 	Convey("Given a server handling language selection", t, func() {
 		handler := &TestHandler{}
-
-		r := &Router{
-			DefaultLanguage: language.English,
-			SupportedLanguages: []language.Tag{
-				language.English,
-				language.Spanish,
-				language.BritishEnglish,
-			},
-			Handler: handler,
-		}
+		i18n := New()
+		r := NewRouter(handler, i18n)
+		i18n.AddSupportedLanguage(language.English, language.Spanish, language.BritishEnglish, language.French)
+		i18n.RemoveSupportedLanguage(language.French)
+		i18n.SetDefaultLanguage(language.English)
 
 		server := httptest.NewServer(r)
 
@@ -67,7 +62,7 @@ func TestRouter(t *testing.T) {
 			So(err, ShouldBeNil)
 
 			Convey("Then the default lang and correct path should be forwarded to the handler", func() {
-				So(handler.Tag, ShouldResemble, r.DefaultLanguage)
+				So(handler.Tag, ShouldResemble, i18n.GetDefaultLanguage())
 				So(handler.Request.URL.Path, ShouldEqual, "/other")
 			})
 		})
@@ -78,7 +73,7 @@ func TestRouter(t *testing.T) {
 			So(err, ShouldBeNil)
 
 			Convey("Then the default lang and correct path should be forwarded to the handler", func() {
-				So(handler.Tag, ShouldResemble, r.DefaultLanguage)
+				So(handler.Tag, ShouldResemble, i18n.GetDefaultLanguage())
 				So(handler.Request.URL.Path, ShouldEqual, "/other")
 			})
 		})

@@ -30,9 +30,15 @@ func GetLanguage(r *http.Request) language.Tag {
 }
 
 type Router struct {
-	DefaultLanguage    language.Tag
-	SupportedLanguages []language.Tag
-	Handler            http.Handler
+	i18n    *I18n
+	handler http.Handler
+}
+
+func NewRouter(handler http.Handler, i18n *I18n) *Router {
+	return &Router{
+		handler: handler,
+		i18n:    i18n,
+	}
 }
 
 func (router *Router) match(lang string) (matched language.Tag, match bool, valid bool, exact bool) {
@@ -47,7 +53,7 @@ func (router *Router) match(lang string) (matched language.Tag, match bool, vali
 	valid = true
 
 	for {
-		for _, supported := range router.SupportedLanguages {
+		for _, supported := range router.i18n.GetSupportedLanguages() {
 			if supported.String() == tag.String() {
 				matched = supported
 				match = true
@@ -87,7 +93,7 @@ func (router *Router) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	if !match {
 		tags, _, _ := language.ParseAcceptLanguage(r.Header.Get("Accept-Language"))
-		tag = router.DefaultLanguage
+		tag = router.i18n.GetDefaultLanguage()
 
 		for _, t := range tags {
 			a, b, _, c := router.match(t.String())
@@ -124,9 +130,9 @@ func (router *Router) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		languages.Unlock()
 	}()
 
-	if router.Handler == nil {
-		router.Handler = http.NotFoundHandler()
+	if router.handler == nil {
+		router.handler = http.NotFoundHandler()
 	}
 
-	http.StripPrefix(strings.Join(segments[:2], "/"), router.Handler).ServeHTTP(w, r)
+	http.StripPrefix(strings.Join(segments[:2], "/"), router.handler).ServeHTTP(w, r)
 }

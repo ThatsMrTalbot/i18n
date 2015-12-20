@@ -21,15 +21,92 @@ type I18n struct {
 	storage      []Storage
 	translations *Cache
 
+	defaultLanguage    language.Tag
+	supportedLanguages []language.Tag
+
 	quit chan struct{}
 }
 
 // New translation manager
 func New(storage ...Storage) *I18n {
+	if len(storage) == 0 {
+		storage = []Storage{NewInMemoryStorage()}
+	}
+
 	return &I18n{
 		storage:      storage,
 		translations: new(Cache),
 	}
+}
+
+func (i18n *I18n) AddSupportedLanguage(tags ...language.Tag) error {
+	i18n.lock.Lock()
+	defer i18n.lock.Unlock()
+
+TagLoop:
+	for _, tag := range tags {
+
+		for _, s := range i18n.storage {
+			err := s.StoreSupportedLanguage(tag)
+			if err != nil {
+				return err
+			}
+		}
+
+		for _, lang := range i18n.supportedLanguages {
+			if lang.String() == tag.String() {
+				continue TagLoop
+			}
+		}
+		i18n.supportedLanguages = append(i18n.supportedLanguages, tag)
+	}
+	return nil
+}
+
+func (i18n *I18n) GetSupportedLanguages() []language.Tag {
+	return i18n.supportedLanguages
+}
+
+func (i18n *I18n) GetDefaultLanguage() language.Tag {
+	return i18n.defaultLanguage
+}
+
+func (i18n *I18n) RemoveSupportedLanguage(tag language.Tag) error {
+	i18n.lock.Lock()
+	defer i18n.lock.Unlock()
+
+	for _, s := range i18n.storage {
+		err := s.DeleteSupportedLanguage(tag)
+		if err != nil {
+			return err
+		}
+	}
+
+	for i, lang := range i18n.supportedLanguages {
+		if lang.String() == tag.String() {
+			i18n.supportedLanguages = append(i18n.supportedLanguages[:i], i18n.supportedLanguages[i+1:]...)
+		}
+	}
+
+	return nil
+}
+
+func (i18n *I18n) SetDefaultLanguage(tag language.Tag) error {
+	i18n.AddSupportedLanguage(tag)
+
+	i18n.lock.Lock()
+	defer i18n.lock.Unlock()
+
+	for _, s := range i18n.storage {
+		err := s.SetDefaultLanguage(tag)
+		if err != nil {
+			return err
+		}
+	}
+
+	i18n.defaultLanguage = tag
+
+	return nil
 }
 
 // Sync translations with database
@@ -51,6 +128,30 @@ func (i18n *I18n) Sync() error {
 		}
 	}
 
+	for _, s := range i18n.storage {
+		tags, err := s.SupportedLanguages()
+		if err != nil {
+			return err
+		}
+
+	TagLoop:
+		for _, tag := range tags {
+			for _, lang := range i18n.supportedLanguages {
+				if lang.String() == tag.String() {
+					continue TagLoop
+				}
+			}
+			i18n.supportedLanguages = append(i18n.supportedLanguages, tag)
+		}
+	}
+
+	if len(i18n.storage) > 0 {
+		def, err := i18n.storage[0].DefaultLanguage()
+		if err != nil {
+			return err
+		}
+		i18n.defaultLanguage = def
+	}
 	return nil
 }
 

@@ -1,17 +1,25 @@
 package server
 
 import (
-	"encoding/json"
 	"errors"
 	"io/ioutil"
 	"net/http"
+	"sync"
+	"time"
+
+	"golang.org/x/text/language"
 
 	"github.com/ThatsMrTalbot/i18n"
-	"golang.org/x/text/language"
 )
 
 type Storage struct {
 	url string
+
+	lock           sync.Mutex
+	updated        time.Time
+	translations   []*i18n.Translation
+	supportedLangs []language.Tag
+	defaultLang    language.Tag
 }
 
 func NewStorage(url string) *Storage {
@@ -20,37 +28,42 @@ func NewStorage(url string) *Storage {
 	}
 }
 
-func decode(body []byte) ([]*i18n.Translation, error) {
-	var objs []*translationObject
-	err := json.Unmarshal(body, &objs)
-	if err != nil {
-		return nil, err
-	}
+func (storage *Storage) sync() error {
+	storage.lock.Lock()
+	defer storage.lock.Unlock()
 
-	t := make([]*i18n.Translation, 0, len(objs))
+	now := time.Now()
+	if now.Sub(storage.updated) > 1*time.Second {
+		resp, err := http.Get(storage.url)
+		if err != nil {
+			return err
+		}
 
-	for _, obj := range objs {
-		t = append(t, &i18n.Translation{
-			Lang:  language.Make(obj.Lang),
-			Key:   obj.Key,
-			Value: obj.Value,
-		})
+		body, err := ioutil.ReadAll(resp.Body)
+		if err != nil {
+			return err
+		}
+
+		t, s, d, err := decode(body)
+		if err != nil {
+			return err
+		}
+
+		storage.translations = t
+		storage.supportedLangs = s
+		storage.defaultLang = d
+		storage.updated = now
 	}
-	return t, nil
+	return nil
 }
 
 func (storage *Storage) GetAll() ([]*i18n.Translation, error) {
-	resp, err := http.Get(storage.url)
+	err := storage.sync()
 	if err != nil {
 		return nil, err
 	}
 
-	body, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		return nil, err
-	}
-
-	return decode(body)
+	return storage.translations, err
 }
 
 func (storage *Storage) Store(t *i18n.Translation) error {
@@ -58,5 +71,35 @@ func (storage *Storage) Store(t *i18n.Translation) error {
 }
 
 func (storage *Storage) Delete(t *i18n.Translation) error {
+	return errors.New("Not implemented")
+}
+
+func (storage *Storage) DefaultLanguage() (language.Tag, error) {
+	err := storage.sync()
+	if err != nil {
+		return language.Und, err
+	}
+
+	return storage.defaultLang, err
+}
+
+func (storage *Storage) SupportedLanguages() ([]language.Tag, error) {
+	err := storage.sync()
+	if err != nil {
+		return nil, err
+	}
+
+	return storage.supportedLangs, err
+}
+
+func (storage *Storage) SetDefaultLanguage(language.Tag) error {
+	return errors.New("Not implemented")
+}
+
+func (storage *Storage) StoreSupportedLanguage(language.Tag) error {
+	return errors.New("Not implemented")
+}
+
+func (storage *Storage) DeleteSupportedLanguage(language.Tag) error {
 	return errors.New("Not implemented")
 }

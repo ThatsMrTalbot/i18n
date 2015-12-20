@@ -1,15 +1,15 @@
 package redis
 
 import (
-	"encoding/json"
-
 	"github.com/ThatsMrTalbot/i18n"
 	"golang.org/x/text/language"
 	"gopkg.in/redis.v3"
 )
 
 const (
-	RedisKey = "i18n_translations"
+	RedisKey                   = "i18n_translations"
+	RedisDefaultLanguageKey    = "i18n_translations_default"
+	RedisSupportedLanguagesKey = "i18n_translations_supported"
 )
 
 type Storage struct {
@@ -38,29 +38,90 @@ func Connect(addr string, password string, db int64) (*Storage, error) {
 	return New(client), nil
 }
 
-type translationObject struct {
-	Lang  string `json:"lang"`
-	Key   string `json:"key"`
-	Value string `json:"value"`
+func (storage *Storage) SupportedLanguages() ([]language.Tag, error) {
+	cmd := storage.client.LRange(RedisSupportedLanguagesKey, 0, -1)
+	results, err := cmd.Result()
+	if err != nil {
+		return nil, err
+	}
+
+	langs := make([]language.Tag, 0, len(results))
+
+	for _, result := range results {
+		langs = append(langs, language.Make(result))
+	}
+
+	return langs, nil
 }
 
-func encode(t *i18n.Translation) string {
-	data, _ := json.Marshal(&translationObject{
-		Lang:  t.Lang.String(),
-		Key:   t.Key,
-		Value: t.Value,
+func (storage *Storage) DefaultLanguage() (language.Tag, error) {
+	cmd := storage.client.Get(RedisDefaultLanguageKey)
+	lang, err := cmd.Result()
+	return language.Make(lang), err
+}
+
+func (storage *Storage) StoreSupportedLanguage(tag language.Tag) error {
+	tx, err := storage.client.Watch(RedisSupportedLanguagesKey)
+	if err != nil {
+		return err
+	}
+	defer tx.Close()
+
+	cmd := tx.LRange(RedisSupportedLanguagesKey, 0, -1)
+	results, err := cmd.Result()
+	if err != nil {
+		return err
+	}
+
+	_, err = tx.Exec(func() error {
+		for _, result := range results {
+			if result == tag.String() {
+				return nil
+			}
+		}
+		tx.LPush(RedisSupportedLanguagesKey, tag.String())
+		return nil
 	})
-	return string(data)
+
+	if err == redis.TxFailedErr {
+		return storage.StoreSupportedLanguage(tag)
+	}
+
+	return err
 }
 
-func decode(t string) (*i18n.Translation, error) {
-	var obj translationObject
-	err := json.Unmarshal([]byte(t), &obj)
-	return &i18n.Translation{
-		Lang:  language.Make(obj.Lang),
-		Key:   obj.Key,
-		Value: obj.Value,
-	}, err
+func (storage *Storage) DeleteSupportedLanguage(tag language.Tag) error {
+	tx, err := storage.client.Watch(RedisSupportedLanguagesKey)
+	if err != nil {
+		return err
+	}
+	defer tx.Close()
+
+	cmd := tx.LRange(RedisSupportedLanguagesKey, 0, -1)
+	results, err := cmd.Result()
+	if err != nil {
+		return err
+	}
+
+	_, err = tx.Exec(func() error {
+		for i, result := range results {
+			if result == tag.String() {
+				tx.LSet(RedisSupportedLanguagesKey, int64(i), "~REMOVE~")
+			}
+		}
+		tx.LRem(RedisSupportedLanguagesKey, 0, "~REMOVE~")
+		return nil
+	})
+
+	if err == redis.TxFailedErr {
+		return storage.StoreSupportedLanguage(tag)
+	}
+
+	return err
+}
+
+func (storage *Storage) SetDefaultLanguage(tag language.Tag) error {
+	return storage.client.Set(RedisDefaultLanguageKey, tag.String(), 0).Err()
 }
 
 func (storage *Storage) GetAll() ([]*i18n.Translation, error) {

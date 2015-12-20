@@ -70,15 +70,7 @@ func main() {
         translations: translations,
     }
 
-    languageRouter := &i18n.Router{
-        DefaultLanguage: language.English,
-        SupportedLanguages: []language.Tag{
-            language.English,
-            language.Spanish,
-            language.BritishEnglish,
-        },
-        Handler: defaultHandler,
-    }
+    languageRouter := NewRouter(defaultHandler, translations)
 
     http.ListenAndServe(":8080", languageRouter)
 }
