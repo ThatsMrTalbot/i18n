@@ -1,6 +1,6 @@
 # i18n
 
-[![GoDoc](https://godoc.org/github.com/ThatsMrTalbot/i18n?status.svg)](https://godoc.org/github.com/ThatsMrTalbot/i18n) [![Build Status](https://travis-ci.org/ThatsMrTalbot/i18n.svg)](https://travis-ci.org/ThatsMrTalbot/i18n)
+[![GoDoc](https://godoc.org/github.com/ThatsMrTalbot/i18n?status.svg)](https://godoc.org/github.com/ThatsMrTalbot/i18n) [![Build Status](https://travis-ci.org/ThatsMrTalbot/i18n.svg)](https://travis-ci.org/ThatsMrTalbot/i18n) [![Coverage Status](https://coveralls.io/repos/ThatsMrTalbot/i18n/badge.svg?branch=master&service=github)](https://coveralls.io/github/ThatsMrTalbot/i18n?branch=master)
 
 This package is a translation package for golang. It provides basic translation management and http routing.
 
