@@ -18,9 +18,9 @@ func TestI18n(t *testing.T) {
 
 		Convey("When a translation is added", func() {
 			expected := &Translation{
-				Lang: language.English,
-				Key:    "SomeKey",
-				Value:  "SomeValue",
+				Lang:  language.English,
+				Key:   "SomeKey",
+				Value: "SomeValue",
 			}
 
 			err := i18n.Add(expected)
@@ -64,9 +64,9 @@ func TestI18n(t *testing.T) {
 		Convey("When a translation is added to the storage", func() {
 
 			expected := &Translation{
-				Lang: language.English,
-				Key:    "SomeKey",
-				Value:  "SomeValue",
+				Lang:  language.English,
+				Key:   "SomeKey",
+				Value: "SomeValue",
 			}
 
 			err := storage.Store(expected)
@@ -93,7 +93,7 @@ func TestI18n(t *testing.T) {
 				i18n.SetRefreshInterval(0)
 
 				storage.Delete(expected)
-				time.Sleep(100 * time.Millisecond)
+				time.Sleep(200 * time.Millisecond)
 
 				result = i18n.Get(language.English, "SomeKey")
 				So(result, ShouldNotBeNil)
@@ -111,9 +111,9 @@ func TestI18n(t *testing.T) {
 		i18n := New(storage)
 
 		expected := &Translation{
-			Lang: language.English,
-			Key:    "SomeKey",
-			Value:  "SomeValue",
+			Lang:  language.English,
+			Key:   "SomeKey",
+			Value: "SomeValue",
 		}
 
 		err := i18n.Add(expected)
