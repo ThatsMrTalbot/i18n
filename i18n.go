@@ -212,6 +212,14 @@ func (i18n *I18n) Close() error {
 	return nil
 }
 
+// Group gets a translation group
+func (i18n *I18n) Group(key string) *Group {
+	return &Group{
+		i18n:  i18n,
+		group: key,
+	}
+}
+
 // GetWithLangString parses the lang string before lookip up the translation
 func (i18n *I18n) GetWithLangString(lang string, key string) (*Translation, error) {
 	tag, err := language.Parse(lang)
