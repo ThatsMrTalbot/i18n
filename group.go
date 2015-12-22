@@ -3,9 +3,12 @@ package i18n
 import (
 	"fmt"
 
+	"github.com/ThatsMrTalbot/i18n"
+
 	"golang.org/x/text/language"
 )
 
+// Group is a translation subgroup
 type Group struct {
 	i18n  *I18n
 	group string
@@ -21,6 +24,14 @@ func (group *Group) Group(key string) *Group {
 		i18n:  group.i18n,
 		group: group.key(key),
 	}
+}
+
+// GenerateHelper generates a method that allways gets tags in a certain language
+// This is usefull for passing to the template engine
+func (group *Group) GenerateHelper(tag language.Tag) T {
+	return T(func(key string) string {
+		return i18n.T(tag, group.key(key))
+	})
 }
 
 // T is a helper method to get translation by lang string or language tag

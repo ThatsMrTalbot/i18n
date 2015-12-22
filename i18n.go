@@ -14,6 +14,9 @@ type Translation struct {
 	Value string
 }
 
+// T is a function for getting a key from the storage
+type T func(string) string
+
 // I18n defines basic translation get/set methods
 type I18n struct {
 	lock sync.RWMutex
@@ -39,6 +42,15 @@ func New(storage ...Storage) *I18n {
 	}
 }
 
+// GenerateHelper generates a method that allways gets tags in a certain language
+// This is usefull for passing to the template engine
+func (i18n *I18n) GenerateHelper(tag language.Tag) T {
+	return T(func(key string) string {
+		return i18n.T(tag, key)
+	})
+}
+
+// AddSupportedLanguage adds a supported language in storage
 func (i18n *I18n) AddSupportedLanguage(tags ...language.Tag) error {
 	i18n.lock.Lock()
 	defer i18n.lock.Unlock()
@@ -63,14 +75,17 @@ TagLoop:
 	return nil
 }
 
+// GetSupportedLanguages gets the supported languages from storage
 func (i18n *I18n) GetSupportedLanguages() []language.Tag {
 	return i18n.supportedLanguages
 }
 
+// GetDefaultLanguage gets the default language from storage
 func (i18n *I18n) GetDefaultLanguage() language.Tag {
 	return i18n.defaultLanguage
 }
 
+// RemoveSupportedLanguage removes a supported language in storage
 func (i18n *I18n) RemoveSupportedLanguage(tag language.Tag) error {
 	i18n.lock.Lock()
 	defer i18n.lock.Unlock()
@@ -91,6 +106,7 @@ func (i18n *I18n) RemoveSupportedLanguage(tag language.Tag) error {
 	return nil
 }
 
+// SetDefaultLanguage sets the default language in storage
 func (i18n *I18n) SetDefaultLanguage(tag language.Tag) error {
 	i18n.AddSupportedLanguage(tag)
 
