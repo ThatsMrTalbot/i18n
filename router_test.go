@@ -96,12 +96,18 @@ func TestRouter(t *testing.T) {
 		})
 
 		Convey("When I finish any request", func() {
+			client := &http.Client{}
 			url := fmt.Sprintf("%s/%s", server.URL, "other")
-			_, err := http.Get(url)
+			req, err := http.NewRequest("GET", url, nil)
+			So(err, ShouldBeNil)
+
+			_, err = client.Do(req)
 			So(err, ShouldBeNil)
 
 			Convey("Then request should be removed from the internal language map", func() {
-				So(languages.values, ShouldHaveLength, 0)
+				tag, ok := languages.Get(req)
+				So(tag.String(), ShouldEqual, language.Und.String())
+				So(ok, ShouldBeFalse)
 			})
 		})
 

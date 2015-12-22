@@ -33,7 +33,7 @@ func (storage *Storage) sync() error {
 	defer storage.lock.Unlock()
 
 	now := time.Now()
-	if now.Sub(storage.updated) > 1*time.Second {
+	if now.Sub(storage.updated) > 1*time.Minute {
 		resp, err := http.Get(storage.url)
 		if err != nil {
 			return err

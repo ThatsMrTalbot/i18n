@@ -3,27 +3,20 @@ package i18n
 import (
 	"net/http"
 	"strings"
-	"sync"
 
 	"golang.org/x/text/language"
 )
 
 var (
-	languages struct {
-		sync.RWMutex
-		values map[*http.Request]language.Tag
-	}
+	languages *requestLanguageMap
 )
 
 func init() {
-	languages.values = make(map[*http.Request]language.Tag)
+	languages = newRequestLanguageMap()
 }
 
 func GetLanguage(r *http.Request) language.Tag {
-	languages.RLock()
-	defer languages.RUnlock()
-
-	if tag, ok := languages.values[r]; ok {
+	if tag, ok := languages.Get(r); ok {
 		return tag
 	}
 	return language.Und
@@ -120,15 +113,8 @@ func (router *Router) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	languages.Lock()
-	languages.values[r] = tag
-	languages.Unlock()
-
-	defer func() {
-		languages.Lock()
-		delete(languages.values, r)
-		languages.Unlock()
-	}()
+	languages.Add(r, tag)
+	defer languages.Delete(r)
 
 	if router.handler == nil {
 		router.handler = http.NotFoundHandler()
