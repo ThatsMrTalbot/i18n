@@ -33,7 +33,9 @@ t.SetRefreshInterval(1 * time.Hour)
 defer t.Close() // This must be called to stop the refresh goroutine
 ```
 
-To use the http router you wrap your default router in the Router object. All URLS will not be prefixed with the language code.
+To use the http router you wrap your default router in the Router object. All URLs will be prefixed with the language code. A specific language will also be matched by a generic parent, so /en-GB/some/path will match en and be redirected to /en/some/path.
+
+If no language is specified in the URL, or it is not supported the Accept-Language header will be used to determine language. If the Accept-Language header is not set then the default language will be used.
 
 ```go
 package main
