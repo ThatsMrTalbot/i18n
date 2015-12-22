@@ -12,8 +12,12 @@ import (
 	"github.com/ThatsMrTalbot/i18n"
 )
 
+type RequestMiddleware func(r *http.Request)
+
 type Storage struct {
 	url string
+
+	middleware []RequestMiddleware
 
 	lock           sync.Mutex
 	updated        time.Time
@@ -22,9 +26,10 @@ type Storage struct {
 	defaultLang    language.Tag
 }
 
-func NewStorage(url string) *Storage {
+func NewStorage(url string, middleware ...RequestMiddleware) *Storage {
 	return &Storage{
-		url: url,
+		url:        url,
+		middleware: middleware,
 	}
 }
 
@@ -34,7 +39,17 @@ func (storage *Storage) sync() error {
 
 	now := time.Now()
 	if now.Sub(storage.updated) > 1*time.Minute {
-		resp, err := http.Get(storage.url)
+		client := &http.Client{}
+		req, err := http.NewRequest("GET", storage.url, nil)
+		if err != nil {
+			return err
+		}
+
+		for _, middleware := range storage.middleware {
+			middleware(req)
+		}
+
+		resp, err := client.Do(req)
 		if err != nil {
 			return err
 		}

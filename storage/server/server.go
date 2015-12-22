@@ -6,17 +6,28 @@ import (
 	"github.com/ThatsMrTalbot/i18n"
 )
 
+// Middleware for server, return true to continue
+type ResponseMiddleware func(w http.ResponseWriter, r *http.Request) bool
+
 type Server struct {
-	storage i18n.Storage
+	storage    i18n.Storage
+	middleware []ResponseMiddleware
 }
 
-func NewServer(storage i18n.Storage) *Server {
+func NewServer(storage i18n.Storage, middleware ...ResponseMiddleware) *Server {
 	return &Server{
-		storage: storage,
+		storage:    storage,
+		middleware: middleware,
 	}
 }
 
 func (server *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	for _, middleware := range server.middleware {
+		if !middleware(w, r) {
+			return
+		}
+	}
+
 	translations, err := server.storage.GetAll()
 
 	if err != nil {
