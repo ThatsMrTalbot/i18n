@@ -3,8 +3,6 @@ package i18n
 import (
 	"fmt"
 
-	"github.com/ThatsMrTalbot/i18n"
-
 	"golang.org/x/text/language"
 )
 
@@ -30,7 +28,7 @@ func (group *Group) Group(key string) *Group {
 // This is usefull for passing to the template engine
 func (group *Group) GenerateHelper(tag language.Tag) T {
 	return T(func(key string) string {
-		return i18n.T(tag, group.key(key))
+		return group.T(tag, group.key(key))
 	})
 }
 
